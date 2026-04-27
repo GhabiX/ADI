@@ -1,7 +1,7 @@
 # ADI: Agent-centric Debugging Interface
 
 > [!NOTE]
-> 🎉 **The ADI paper, _Empowering Autonomous Debugging Agents with Efficient Dynamic Analysis_, has been accepted to the ACM International Conference on the Foundations of Software Engineering (FSE 2026).**
+> 🎉 The ADI paper, _Empowering Autonomous Debugging Agents with Efficient Dynamic Analysis_, has been accepted to the ACM International Conference on the Foundations of Software Engineering (FSE 2026)!
 > 📦 The artifact for the accepted FSE paper is available in [`FSE26-Artifact/`](./FSE26-Artifact/).
 
 ADI is the agent-centric debugging interface proposed in our paper, _Empowering Autonomous Debugging Agents with Efficient Dynamic Analysis_.
