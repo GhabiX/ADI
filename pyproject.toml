@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adi-py"
+version = "2.6.0"
+description = "Agent-centric Debugging Interface"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.0.0"]
+
+[project.scripts]
+adi = "ADI.cli:main"
+adi-mcp = "ADI.server:main_cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["ADI*"]

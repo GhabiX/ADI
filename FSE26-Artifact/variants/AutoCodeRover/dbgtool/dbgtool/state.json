@@ -1,0 +1,9 @@
+{
+    "target_frame_parent_id": "/swe-bench/swe-final/auto-code-rover/tmp/test.py:main#1",
+    "bp_frame_id": "/swe-bench/swe-final/auto-code-rover/tmp/test.py:add#2",
+    "curr_frame_id": "/swe-bench/swe-final/auto-code-rover/tmp/test.py:add#2",
+    "cmd": "python test.py",
+    "candidate_method_names": [
+        "add"
+    ]
+}

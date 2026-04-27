@@ -1,0 +1,115 @@
+# Artifacts for Paper: Empowering Autonomous Debugging Agents with Efficient Dynamic Analysis
+
+This repository contains the official artifacts for the paper "Empowering Autonomous Debugging Agents with Efficient Dynamic Analysis". We provide the source code for our agent, **FramePilot**, the implementation of the **Agent-centric Debugging Interface (ADI)**, experiment data, and the variants used in our evaluation.
+
+## FramePilot
+
+**FramePilot** is an autonomous agent designed for automated program repair. It leverages our novel **Agent-centric Debugging Interface (ADI)** to perform efficient, function-level dynamic analysis. 
+
+## QuickStart
+
+Follow these instructions to set up the environment and run FramePilot.
+
+### Prerequisites
+
+1.  **Docker:** The evaluation is run within a Docker container to ensure a consistent environment. Please install Docker.
+2.  **Python:** Python 3.9.7 is required to run the main script.
+3.  **SWE-bench Image:** You need to pull the official SWE-bench Docker image.
+    ```bash
+    docker pull swebench/swe-bench:latest
+    ```
+4.  **API Keys:** You need access to an LLM API (e.g., Anthropic, OpenAI).
+
+### Setup & Execution
+
+1.  **Clone the Repository:**
+
+    ```bash
+    git clone <this_repository_url>
+    cd <repository_directory>
+    ```
+
+2.  **Configure API Keys:**
+    Open the file `./src/dbg_query_llm.py` and add your API key and base URL in the designated section.
+
+3.  **Run FramePilot:**
+    The main execution script is `./src/dbg_docker_handler.py`. You can configure which instances to run and the number of parallel workers directly within this file.
+    To start the process, run:
+
+    ```bash
+    python ./src/dbg_docker_handler.py
+    ```
+
+## ADI: Agent-centric Debugging Interface
+
+ADI is a novel interactive debugging interface designed for autonomous agents. It shifts the paradigm from low-level, statement-by-statement interaction to a more efficient, function-level model. This is powered by its core data structure, the **Frame Lifetime Trace (FLT)**, and a set of high-level navigational commands.
+
+ADI centers on a function-level abstraction called the **Frame Lifetime Trace (FLT)**. 
+Rather than exposing a low-level REPL-style debugger interface, FLT provides a compact, frame-centric view of a function invocation, including key arguments, return values, state changes, and summarized dynamic context that helps agents reason about runtime behavior more efficiently.
+
+The agent interacts with the execution trace using a set of powerful commands:
+
+  * **Breakpoint Management:** `break`, `clear`
+  * **Chronological Navigation:** `continue`, `prev`
+  * **Call Stack Navigation:** `step-into`, `step-out`
+  * **State Inspection:** `call-tree`, `execute`
+
+### Implementation Details
+
+To enhance the efficiency and usability of ADI for autonomous agents, we incorporated several key implementation details:
+
+  * **On-Demand Tracing:** To avoid prohibitive performance overhead, ADI uses Python's `sys.settrace` facility for selective, on-demand instrumentation. Fine-grained, statement-level tracing is activated only for the specific function frame the agent is currently inspecting.
+  * **Trace Optimization:** For functions with large loops, our tracer intelligently captures only the first and last iterations to avoid overwhelming the agent, reporting the intermediate steps as a single "skipped" block. Similarly, the `call-tree` command is bounded to explore a maximum of three levels down the call hierarchy.
+  * **Robust Function Matching:** To improve usability, if an exact function name for a breakpoint does not match, our system provides a list of partially matching function names to help the agent correct its command.
+  * **Crash Handling:** The tracer is designed to terminate upon a crash and can be configured to automatically stop at the frame where an unhandled exception occurs. This is crucial for debugging crashing bugs efficiently.
+
+## Agent
+
+FramePilot is built upon the **ReAct (Reasoning and Acting)** framework. The agent iteratively generates thoughts to reason about the problem and actions to invoke tools, using the resulting observations to inform its next steps.
+
+Its problem-solving process is structured into four main stages:
+
+1.  **Code Orientation:** Understand the codebase and relevant files.
+2.  **Issue Reproduction:** Analyze the issue, explore the codebase, and construct a reproduction script or targeted execution scenario.
+3.  **Root-Cause Analysis:** Use the **ADI** toolset to perform dynamic analysis and pinpoint the source of the bug.
+4.  **Patch Implementation:** Generate and apply a patch to fix the issue.
+5. **Verification:** Run existing test to verify the patch.
+
+Beyond the core ADI commands, the agent is equipped with basic toolkit for file system operations (`search_def`, `str_replace`, `new_file`) and bash operations (`execute_bash`).
+
+## Results
+
+   Patches and corresponding evaluation results generated by FramePilot are stored in the `./patches` directory, organized by the benchmark and LLM used.
+
+
+## Variants & Plug-and-play
+
+We provide the code for all variants used in our paper in the `./variants` directory.
+
+  * **BaseAgent:** A baseline agent that implement a standard ReAct framework  using only file editing and test execution tools.
+  * **PDBAgent:** This agent extends BaseAgent with access to a traditional, human-centric PDB (Python Debugger) interface.
+
+### Plug-and-play Integration
+
+We also demonstrate ADI's generality by integrating it as a plug-and-play component into two existing SOTA agents.
+
+  * **Mini-SWE-Agent:** We adapted its main prompt to include ADI usage instructions and added an optional dynamic analysis stage to its workflow. The code can be found in `./variants/mini-swe-agent`.
+  * **AutoCodeRover:** We enhanced its context retrieval agent by prompting it to use ADI for collecting dynamic runtime information before attempting a patch. The code can be found in `./variants/AutoCodeRover`.
+
+## Appendix
+
+### Command Ablation Study
+
+To assess the impact of different components within the Agent-centric Debugging Interface (ADI), we conducted a command ablation study using FramePilot on the SWE-bench Verified benchmark, paired with Claude-3.7-Sonnet. The results reveal that integrating the **Core Navigation** commands (`break`, `continue`, `clear`, `prev`, `step-into`, `step-out`) led to a **10.5%** improvement in performance. These commands, essential for interactive debugging, allow the agent to efficiently traverse execution traces, quickly identifying and isolating issues in complex code. When **Advanced Inspection** capabilities, such as `execute` and `call-tree`, were added, the performance increased by an additional **5.5%**, resulting in a total performance boost of **16%**. This highlights ADI’s ability to provide not only efficient navigation but also deep, context-sensitive insights into program execution. The findings underscore how ADI’s integrated design enables fine-grained analysis, improving debugging accuracy and overall agent performance.
+
+
+
+
+
+
+
+### FramePilot Resolved Tasks Distribution
+
+![Alt text](figure/task_distribution.png)
+
+To evaluate the generalizability and effectiveness of FramePilot across different task types, we analyzed the distribution of resolved tasks in various categories. The results, shown in the figure below, demonstrate that FramePilot (`DBGAgent`) outperforms both `BaseAgent` and `PDBAgent` in all task categories. The improvement is especially notable in **Bug** and **Regression** tasks, which typically involve complex, state-dependent errors that are challenging to diagnose without the deep dynamic analysis capabilities offered by ADI. Additionally, the gains in **Feature** and **Other** (e.g., refactoring, optimization) tasks further highlight the versatility of our approach.

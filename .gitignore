@@ -1,0 +1,4 @@
+__pycache__
+test/perf/perf_testbed/
+*.egg-info/
+*.backup
